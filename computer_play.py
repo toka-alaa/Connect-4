@@ -8,25 +8,22 @@ Original file is located at
 """
 
 def computer_play(self, current_state):
-    player = self.current_player(current_state)
-    print(f"Computer turn, he is playing with {player}")
+        player = self.current_player(current_state)
+        print(f"Computer turn ({player})")
 
-    actions = self.available_actions(current_state)
-    next_expected_states = [
-        self.take_action(current_state, action)
-        for action in actions ]
+        actions = self.available_actions(current_state)
+        next_states = [self.take_action(current_state, action) for action in actions]
+        utility_values = [self.MinMax(state) for state in next_states]
 
-    utility_values = [
-        self.MinMax(state)
-        for state in next_expected_states ]
+        if player == "R":
+            best_value = max(utility_values)
+        else:
+            best_value = min(utility_values)
 
-    best_value = min(utility_values)
-    index = utility_values.index(best_value)
-    player, col = actions[index]
-    print(f"Computer decided to play in column {col}")
+        index = utility_values.index(best_value)
+        _, col = actions[index]
+        print(f"Computer chose column {col}")
 
-    new_state = self.take_action(current_state, actions[index])
-
-    self.display_grid(new_state)
-
-    return new_state
+        new_state = self.take_action(current_state, actions[index])
+        self.display_grid(new_state)
+        return new_state
