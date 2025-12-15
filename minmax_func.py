@@ -1,10 +1,10 @@
 def MinMax(self, current_state):
         terminal = self.check_terminal(current_state)
         if terminal != "Not terminal":
-            if terminal == "Red":
-                return 1000
-            elif terminal == "Yellow":
-                return -1000
+            if terminal == "R":
+                return 1
+            elif terminal == "Y":
+                return -1
             else:  
                 return 0
 
@@ -16,4 +16,5 @@ def MinMax(self, current_state):
         if self.current_player(current_state) == "Red":
             return max(utility_values)
         else:
+
             return min(utility_values)
