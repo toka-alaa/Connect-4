@@ -7,21 +7,17 @@ Original file is located at
     https://colab.research.google.com/drive/1fBjf-7lEqr660VzEpuvEby8lJU2mnq56
 """
 
-def deftake_action(self, current_state, action):
-    new_state = [[" " for _ in range(7)] for _ in range(6)]
-    for row in range(6):
-        for col in range(7):
-            new_state[row][col] = current_state[row][col]
+def take_action(self, current_state, action):
+        new_state = [[" " for _ in range(7)] for _ in range(6)]
+        for row in range(6):
+            for col in range(7):
+                new_state[row][col] = current_state[row][col]
 
-    player, col = action
-    placed = False
-    for row in range(5, -1, -1):
-        if new_state[row][col] == " ":
-            new_state[row][col] = player
-            placed = True
-            break
+        player, col = action
 
-    if not placed:
-        raise ValueError(f"Column {col} is full. Cannot place piece.")
+        for row in range(5, -1, -1):
+            if new_state[row][col] == " ":
+                new_state[row][col] = player
+                return new_state
 
-    return new_state
+        raise ValueError("Column is full")
