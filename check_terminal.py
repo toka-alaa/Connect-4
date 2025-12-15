@@ -6,27 +6,33 @@ class Connect4:
     def check_terminal(self,state):
 
         for r in range(self.rows):                        #checking horizontal
-            for c in range(self.cols):
+            for c in range(self.cols-3):
                 if state[r][c]!=0 and \
-                   state[r][c+1]==state[r][c+2]==state[r][c+3]==state[r][c+4]:
+                   state[r][c]==state[r][c+1]==state[r][c+2]==state[r][c+3]:
                     return state[r][c]
 
         for c in range(self.cols):
-            for r in range(self.rows):                    #checking vertical
+            for r in range(self.rows-3):                    #checking vertical
                 if state[r][c]!=0 and \
                    state[r][c]==state[r+1][c]==state[r+2][c]==state[r+3][c]:
                     return state[r][c]
 
         
-        for r in range(self.rows):
-            for c in range(self.cols):                     #checking up diagonal
+        for r in range(self.rows-3):
+            for c in range(self.cols-3):                     #checking up diagonal
                 if state[r][c]!=0 and \
                    state[r][c]==state[r+1][c+1]==state[r+2][c+2]==state[r+3][c+3]:
                     return state[r][c]
 
         
         for r in range(3,self.rows):
-            for c in range(self.cols):                        #checking down diagonal
+            for c in range(self.cols-3):                        #checking down diagonal
                 if state[r][c]!=0 and \
                    state[r][c]==state[r-1][c+1]==state[r-2][c+2]==state[r-3][c+3]:
                     return state[r][c]
+
+        for row in state:
+            if 0 in row:
+                return None  # Game is resumed
+
+        return 0
