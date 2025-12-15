@@ -3,7 +3,7 @@ def current_player(self, state):
         
         for row in range(6):
             for col in range(7):
-                if state[row][col] != NULL:
+                if state[row][col] != " ":
                     moves_num+= 1
         
-        return "Player 1" if moves_num%2 == 0 else "Player 2"
+        return "R" if moves_num%2 == 0 else "Y"
