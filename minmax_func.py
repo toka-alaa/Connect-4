@@ -5,16 +5,15 @@ def MinMax(self, current_state):
                 return 1
             elif terminal == "Y":
                 return -1
-            else:  
-                return 0
 
         utility_values = []
         for action in self.available_actions(current_state):
             next_state = self.take_action(current_state, action)
             utility_values.append(self.MinMax(next_state))
 
-        if self.current_player(current_state) == "Red":
+        if self.current_player(current_state) == "R":
             return max(utility_values)
         else:
 
             return min(utility_values)
+
