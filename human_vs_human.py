@@ -2,7 +2,7 @@ def human_vs_human(self, current_state):
     new_state = current_state
     self.display_grid(new_state)
 
-    while self.check_terminal(new_state) is None:
+    while self.check_terminal(new_state) == "Not terminal":
         player = self.current_player(new_state)
         print(f"It is {player}'s turn")
 
