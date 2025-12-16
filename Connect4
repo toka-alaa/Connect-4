@@ -1,0 +1,201 @@
+import copy
+import time
+
+class Connect4:
+
+    def __init__(self):
+        self.rows = 6
+        self.cols = 7
+        self.max_depth = 4
+
+#-------------------------------------------------------------------------------------------
+
+    def initial_state(self):
+        return [[" " for _ in range(self.cols)] for _ in range(self.rows)]
+
+#-------------------------------------------------------------------------------------------
+
+    def display_grid(self, state):
+        print("   " + "   ".join(str(c) for c in range(self.cols)))
+        print("  +" + "---+" * self.cols)
+
+        for row in state:
+            print("  | " + " | ".join(row) + " |")
+            print("  +" + "---+" * self.cols)
+
+#--------------------------------------------------------------------------------------------
+
+    def take_action(self, state, action):
+        player, col = action
+        new_state = copy.deepcopy(state)
+        for row in reversed(range(self.rows)):
+            if new_state[row][col] == " ":
+                new_state[row][col] = player
+                return new_state
+        raise ValueError("Column is full")
+
+#----------------------------------------------------------------------------------------------
+
+    def current_player(self, state):
+        count_R = sum(cell == "R" for row in state for cell in row)
+        count_Y = sum(cell == "Y" for row in state for cell in row)
+        return "R" if count_R == count_Y else "Y"
+
+#-----------------------------------------------------------------------------------------------
+
+    def available_actions(self, state):
+        player = self.current_player(state)
+        return [(player, col) for col in range(self.cols) if state[0][col] == " "]
+
+#------------------------------------------------------------------------------------------------
+
+    def check_terminal(self, state):
+        # Horizontal
+        for r in range(self.rows):
+            for c in range(self.cols - 3):
+                line = state[r][c:c+4]
+                if line[0] != " " and all(x == line[0] for x in line):
+                    return line[0]
+
+        # Vertical
+        for c in range(self.cols):
+            for r in range(self.rows - 3):
+                line = [state[r+i][c] for i in range(4)]
+                if line[0] != " " and all(x == line[0] for x in line):
+                    return line[0]
+
+        # Diagonal \
+        for r in range(self.rows - 3):
+            for c in range(self.cols - 3):
+                line = [state[r+i][c+i] for i in range(4)]
+                if line[0] != " " and all(x == line[0] for x in line):
+                    return line[0]
+
+        # Diagonal /
+        for r in range(3, self.rows):
+            for c in range(self.cols - 3):
+                line = [state[r-i][c+i] for i in range(4)]
+                if line[0] != " " and all(x == line[0] for x in line):
+                    return line[0]
+
+        if all(state[0][c] != " " for c in range(self.cols)):
+            return "Draw"
+        return None
+
+# --------------------------------------------------------------------------------------------------
+
+    def evaluate_state(self, state):
+        score = 0
+        for r in range(self.rows):
+            for c in range(self.cols - 3):
+                score += self.evaluate_line(state[r][c:c+4])
+        for r in range(self.rows - 3):
+            for c in range(self.cols):
+                score += self.evaluate_line([state[r+i][c] for i in range(4)])
+        for r in range(self.rows - 3):
+            for c in range(self.cols - 3):
+                score += self.evaluate_line([state[r+i][c+i] for i in range(4)])
+        for r in range(3, self.rows):
+            for c in range(self.cols - 3):
+                score += self.evaluate_line([state[r-i][c+i] for i in range(4)])
+        return score
+
+# --------------------------------------------------------------------------------------------------
+
+    def evaluate_line(self, line):
+        if line.count("R") > 0 and line.count("Y") > 0:
+            return 0
+        elif line.count("R") > 0:
+            return 10 ** line.count("R")
+        elif line.count("Y") > 0:
+            return -(10 ** line.count("Y"))
+        return 0
+
+# --------------------------------------------------------------------------------------------------
+
+    def minmax(self, state, depth, alpha, beta, maximizing):
+        terminal = self.check_terminal(state)
+        if terminal == "R":
+            return 1
+        elif terminal == "Y":
+            return -1
+        elif terminal == "Draw":
+            return 0
+        if depth == 0:
+            return self.evaluate_state(state)
+
+        actions = self.available_actions(state)
+        if maximizing:
+            value = -float('inf')
+            for action in actions:
+                value = max(value, self.minmax(self.take_action(state, action), depth-1, alpha, beta, False))
+                alpha = max(alpha, value)
+                if alpha >= beta:
+                    break
+            return value
+        else:
+            value = float('inf')
+            for action in actions:
+                value = min(value, self.minmax(self.take_action(state, action), depth-1, alpha, beta, True))
+                beta = min(beta, value)
+                if alpha >= beta:
+                    break
+            return value
+
+# --------------------------------------------------------------------------------------------------
+
+    def computer_play(self, state):
+        player = self.current_player(state)
+        actions = self.available_actions(state)
+        best_value = -float('inf') if player == "R" else float('inf')
+        best_action = None
+        for action in actions:
+            next_state = self.take_action(state, action)
+            value = self.minmax(next_state, self.max_depth-1, -float('inf'), float('inf'), player=="Y")
+            if (player == "R" and value > best_value) or (player == "Y" and value < best_value):
+                best_value = value
+                best_action = action
+        print(f"{player} (Computer) chose column {best_action[1]}")
+        new_state = self.take_action(state, best_action)
+        self.display_grid(new_state)
+        time.sleep(1) 
+        return new_state
+
+# --------------------------------------------------------------------------------------------------
+    def run_game(self, mode):
+        state = self.initial_state()
+        # Human vs Human
+        if mode == "1":
+            while self.check_terminal(state) is None:
+                player = self.current_player(state)
+                col = int(input(f"{player}'s turn, choose column (0-6): "))
+                state = self.take_action(state, (player, col))
+                self.display_grid(state)
+        # Human vs Computer
+        elif mode == "2":
+            while self.check_terminal(state) is None:
+                if self.current_player(state) == "R":
+                    col = int(input("Your turn (R), choose column (0-6): "))
+                    state = self.take_action(state, ("R", col))
+                else:
+                    state = self.computer_play(state)
+        # Computer vs Computer
+        else:
+            while self.check_terminal(state) is None:
+                state = self.computer_play(state)
+
+        winner = self.check_terminal(state)
+        if winner == "Draw":
+            print("It's a draw!")
+        else:
+            print("Winner:", winner)
+
+#--------------------------------------------------------------------------------------------------
+if __name__ == "__main__":
+    game = Connect4()
+    print("Choose game mode:")
+    print("1 - Human vs Human")
+    print("2 - Human vs Computer")
+    print("3 - Computer vs Computer")
+    mode = input("Enter mode: ")
+    game.run_game(mode)
